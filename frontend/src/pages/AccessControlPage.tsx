@@ -152,7 +152,7 @@ const AccessControlPage: React.FC = () => {
           <UserRow
             key={u.id}
             u={u}
-            isSelf={u.id === currentUser?.id}
+            isSelf={u.id === currentUser?.id || u.email === currentUser?.email}
             isUpdating={updatingId === u.id}
             onRoleChange={handleRoleChange}
           />

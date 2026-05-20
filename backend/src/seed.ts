@@ -20,5 +20,5 @@ export const seedAdmin = async (): Promise<void> => {
 
   await User.create({ name, email, password, role: 'admin' });
   console.log(`🌱 Default admin created: ${email}`);
-  console.log('⚠️  Change the admin password after first login!');
+  console.log('  Change the admin password after first login!');
 };

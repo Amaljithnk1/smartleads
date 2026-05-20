@@ -1,10 +1,123 @@
 import React, { useState } from 'react';
-import { Sun, Moon, User, Lock, Bell, Palette } from 'lucide-react';
+import { Sun, Moon, User, Lock, Bell, Palette, Eye, EyeOff } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Topbar from '../components/layout/Topbar';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { authService } from '../services/authService';
+import { getErrorMessage } from '../utils';
 import toast from 'react-hot-toast';
+
+// ─── Password Section ─────────────────────────────────────────────────────────
+
+interface PasswordForm {
+  newPassword: string;
+  confirmPassword: string;
+}
+
+interface PasswordErrors {
+  newPassword?: string;
+  confirmPassword?: string;
+}
+
+const SecuritySection: React.FC = () => {
+  const [form, setForm] = useState<PasswordForm>({
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [errors, setErrors] = useState<PasswordErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+
+  const set = (key: keyof PasswordForm, val: string) => {
+    setForm((p) => ({ ...p, [key]: val }));
+    setErrors((p) => ({ ...p, [key]: undefined }));
+  };
+
+  const validate = (): boolean => {
+    const e: PasswordErrors = {};
+    if (form.newPassword.length < 6) e.newPassword = 'Password must be at least 6 characters';
+    if (form.newPassword !== form.confirmPassword) e.confirmPassword = 'Passwords do not match';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    setIsLoading(true);
+    try {
+      await authService.updatePassword(form.newPassword);
+      toast.success('Password updated successfully');
+      setForm({ newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      {/* New password */}
+      <div>
+        <label htmlFor="new-password" className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">
+          New Password
+        </label>
+        <div className="relative">
+          <input
+            id="new-password"
+            type={showNew ? 'text' : 'password'}
+            className="input pr-10"
+            placeholder="Min. 6 characters"
+            value={form.newPassword}
+            onChange={(e) => set('newPassword', e.target.value)}
+            autoComplete="new-password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowNew((s) => !s)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+          >
+            {showNew ? <EyeOff size={14} /> : <Eye size={14} />}
+          </button>
+        </div>
+        {errors.newPassword && (
+          <p className="text-[11px] text-[var(--red)] mt-1">{errors.newPassword}</p>
+        )}
+      </div>
+
+      {/* Confirm password */}
+      <div>
+        <label htmlFor="confirm-password" className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">
+          Confirm Password
+        </label>
+        <input
+          id="confirm-password"
+          type="password"
+          className="input"
+          placeholder="Repeat new password"
+          value={form.confirmPassword}
+          onChange={(e) => set('confirmPassword', e.target.value)}
+          autoComplete="new-password"
+        />
+        {errors.confirmPassword && (
+          <p className="text-[11px] text-[var(--red)] mt-1">{errors.confirmPassword}</p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="btn btn-ghost text-[12px] px-4 py-2"
+      >
+        {isLoading ? 'Updating…' : 'Update Password'}
+      </button>
+    </form>
+  );
+};
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();
@@ -21,16 +134,16 @@ const SettingsPage: React.FC = () => {
         <Section icon={<User size={15} />} title="Profile">
           <div className="space-y-3">
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">Display Name</label>
-              <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+              <label htmlFor="display-name" className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">Display Name</label>
+              <input id="display-name" className="input" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">Email</label>
-              <input className="input" value={user?.email ?? ''} disabled />
+              <label htmlFor="profile-email" className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">Email</label>
+              <input id="profile-email" className="input" value={user?.email ?? ''} disabled />
             </div>
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">Role</label>
-              <input className="input capitalize" value={user?.role ?? ''} disabled />
+              <label htmlFor="profile-role" className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">Role</label>
+              <input id="profile-role" className="input capitalize" value={user?.role ?? ''} disabled />
             </div>
             <button
               className="btn btn-primary text-[12px] px-4 py-2"
@@ -50,10 +163,7 @@ const SettingsPage: React.FC = () => {
                 Currently using <span className="text-[var(--accent)]">{theme} mode</span>
               </div>
             </div>
-            <button
-              onClick={toggleTheme}
-              className="btn btn-secondary text-[12px] gap-2 px-4 py-2"
-            >
+            <button onClick={toggleTheme} className="btn btn-secondary text-[12px] gap-2 px-4 py-2">
               {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
               Switch to {theme === 'dark' ? 'Light' : 'Dark'}
             </button>
@@ -80,22 +190,7 @@ const SettingsPage: React.FC = () => {
 
         {/* Security */}
         <Section icon={<Lock size={15} />} title="Security">
-          <div className="space-y-3">
-            <div>
-              <label className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">New Password</label>
-              <input type="password" className="input" placeholder="Min. 6 characters" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">Confirm Password</label>
-              <input type="password" className="input" placeholder="Repeat password" />
-            </div>
-            <button
-              className="btn btn-ghost text-[12px] px-4 py-2"
-              onClick={() => toast.success('Password updated')}
-            >
-              Update Password
-            </button>
-          </div>
+          <SecuritySection />
         </Section>
 
       </div>

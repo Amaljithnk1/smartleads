@@ -94,7 +94,41 @@ export const getUsers = async (
 ): Promise<void> => {
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
-    res.status(200).json({ success: true, data: { users } });
+    const mapped = users.map((u) => ({
+      id: u._id.toString(),
+      name: u.name,
+      email: u.email,
+      role: u.role,
+    }));
+    res.status(200).json({ success: true, data: { users: mapped } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updatePassword = async (
+  req: AuthRequest,
+  res: Response<ApiResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { newPassword } = req.body as { newPassword: string };
+
+    if (!newPassword || newPassword.length < 6) {
+      res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' });
+      return;
+    }
+
+    const user = await User.findById(req.user!.id).select('+password');
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found.' });
+      return;
+    }
+
+    user.password = newPassword;
+    await user.save(); // triggers bcrypt pre-save hook
+
+    res.status(200).json({ success: true, message: 'Password updated successfully.' });
   } catch (err) {
     next(err);
   }
@@ -133,7 +167,7 @@ export const updateRole = async (
     res.status(200).json({
       success: true,
       message: `User role updated to ${role}.`,
-      data: { user },
+      data: { user: { id: user._id.toString(), name: user.name, email: user.email, role: user.role } },
     });
   } catch (err) {
     next(err);

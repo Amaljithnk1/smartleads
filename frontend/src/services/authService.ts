@@ -26,4 +26,8 @@ export const authService = {
     const res = await api.patch<ApiResponse<{ user: User }>>(`/auth/users/${userId}/role`, { role });
     return res.data.data!.user;
   },
+
+  async updatePassword(newPassword: string): Promise<void> {
+    await api.patch('/auth/password', { newPassword });
+  },
 };
