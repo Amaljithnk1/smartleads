@@ -53,7 +53,7 @@ UserSchema.methods.comparePassword = async function (
 
 UserSchema.set('toJSON', {
   transform: (_doc, ret) => {
-    (ret as Record<string, unknown>)['password'] = undefined;
+    (ret as unknown as Record<string, unknown>)['password'] = undefined;
     return ret;
   },
 });
