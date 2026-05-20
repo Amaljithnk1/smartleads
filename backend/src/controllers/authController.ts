@@ -7,9 +7,8 @@ import { AppError } from '../middleware/errorHandler';
 const signToken = (payload: JwtPayload): string => {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new AppError('JWT secret not configured', 500);
-  return jwt.sign(payload, secret, {
-    expiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
-  });
+  const expiresIn = (process.env.JWT_EXPIRES_IN ?? '7d') as `${number}${'s' | 'm' | 'h' | 'd' | 'w' | 'y'}`;
+  return jwt.sign(payload, secret, { expiresIn });
 };
 
 export const register = async (
