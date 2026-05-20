@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, FileText, Filter } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import Topbar from '../components/layout/Topbar';
 import LeadTable from '../components/leads/LeadTable';

@@ -16,7 +16,7 @@ const INITIAL: LeadFormData = {
 
 const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit, lead, isLoading }) => {
   const [form, setForm] = useState<LeadFormData>(INITIAL);
-  const [errors, setErrors] = useState<Partial<LeadFormData>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof LeadFormData, string>>>({});
 
   useEffect(() => {
     if (lead) {
@@ -28,7 +28,7 @@ const LeadModal: React.FC<LeadModalProps> = ({ isOpen, onClose, onSubmit, lead, 
   }, [lead, isOpen]);
 
   const validate = (): boolean => {
-    const e: Partial<LeadFormData> = {};
+    const e: Partial<Record<keyof LeadFormData, string>> = {};
     if (!form.name.trim() || form.name.length < 2) e.name = 'Name must be at least 2 characters';
     if (!form.email.match(/^\S+@\S+\.\S+$/)) e.email = 'Valid email required';
     if (!form.source) e.source = 'Source is required';

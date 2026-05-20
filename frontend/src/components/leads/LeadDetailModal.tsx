@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Mail, Tag, Antenna, Calendar, User } from 'lucide-react';
+import { X, Tag, Antenna, Calendar, User } from 'lucide-react';
 import { Lead } from '../../types';
 import { formatDate, getInitials, getAvatarColor, getStatusBadgeClass, getSourceBadgeClass } from '../../utils';
 

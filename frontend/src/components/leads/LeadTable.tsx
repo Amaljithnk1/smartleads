@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit2, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Edit2, Trash2 } from 'lucide-react';
 import { Lead } from '../../types';
 import { formatDate, getInitials, getAvatarColor, getStatusBadgeClass, getSourceBadgeClass } from '../../utils';
 import { useAuth } from '../../context/AuthContext';
