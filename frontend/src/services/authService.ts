@@ -21,4 +21,9 @@ export const authService = {
     const res = await api.get<ApiResponse<{ users: User[] }>>('/auth/users');
     return res.data.data!.users;
   },
+
+  async updateRole(userId: string, role: 'admin' | 'sales'): Promise<User> {
+    const res = await api.patch<ApiResponse<{ user: User }>>(`/auth/users/${userId}/role`, { role });
+    return res.data.data!.user;
+  },
 };

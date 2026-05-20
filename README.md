@@ -58,6 +58,9 @@ npm run dev
 Frontend: http://localhost:5173  
 Backend API: http://localhost:5000
 
+> **Default admin credentials** — set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `backend/.env` before first startup. The account is created automatically if no admin exists.  
+> Change the password after first login via Settings.
+
 ---
 
 ## Docker Setup
@@ -83,6 +86,11 @@ JWT_SECRET=your_super_secret_key
 JWT_EXPIRES_IN=7d
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
+
+# Default admin — set these before first startup
+ADMIN_NAME=Admin
+ADMIN_EMAIL=admin@smartleads.com
+ADMIN_PASSWORD=admin123
 ```
 
 ### Frontend (`frontend/.env`)
@@ -106,11 +114,11 @@ http://localhost:5000/api
 {
   "name": "Rahul Sharma",
   "email": "rahul@example.com",
-  "password": "password123",
-  "role": "sales"
+  "password": "password123"
 }
 ```
-Response: `{ token, user }`
+Response: `{ token, user }`  
+> All self-registered users get the `sales` role. Use the Access Control page to promote users to `admin`.
 
 #### POST `/auth/login`
 ```json
@@ -123,6 +131,12 @@ Headers: `Authorization: Bearer <token>`
 
 #### GET `/auth/users` *(Admin only)*
 Returns all users.
+
+#### PATCH `/auth/users/:id/role` *(Admin only)*
+```json
+{ "role": "admin" }
+```
+Promotes or demotes a user. Admins cannot change their own role.
 
 ---
 

@@ -29,6 +29,9 @@ services:
       JWT_EXPIRES_IN: 7d
       NODE_ENV: production
       FRONTEND_URL: http://localhost:5173
+      ADMIN_NAME: ${ADMIN_NAME:-Admin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@smartleads.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
     depends_on:
       - mongo
     networks:

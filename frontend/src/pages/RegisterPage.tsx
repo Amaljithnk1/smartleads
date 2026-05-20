@@ -3,20 +3,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Zap, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../utils';
-import { UserRole } from '../types';
 import toast from 'react-hot-toast';
 
 interface FormState {
   name: string;
   email: string;
   password: string;
-  role: UserRole;
 }
 
 const RegisterPage: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState<FormState>({ name: '', email: '', password: '', role: 'sales' });
+  const [form, setForm] = useState<FormState>({ name: '', email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<FormState>>({});
@@ -102,14 +100,6 @@ const RegisterPage: React.FC = () => {
                 </button>
               </div>
               {errors.password && <p className="text-[11px] text-[var(--red)] mt-1">{errors.password}</p>}
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-mono uppercase tracking-[1px] text-[var(--text-muted)] mb-1.5">Role</label>
-              <select className="input" value={form.role} onChange={(e) => set('role', e.target.value)}>
-                <option value="sales">Sales User</option>
-                <option value="admin">Admin</option>
-              </select>
             </div>
 
             <button type="submit" disabled={isLoading} className="btn btn-primary w-full mt-2">

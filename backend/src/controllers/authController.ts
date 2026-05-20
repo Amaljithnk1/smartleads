@@ -18,8 +18,8 @@ export const register = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { name, email, password, role } = req.body as {
-      name: string; email: string; password: string; role?: string;
+    const { name, email, password } = req.body as {
+      name: string; email: string; password: string;
     };
 
     const existing = await User.findOne({ email });
@@ -28,7 +28,9 @@ export const register = async (
       return;
     }
 
-    const user = await User.create({ name, email, password, role: role ?? 'sales' });
+    // All self-registered users are sales by default.
+    // Admins are created via the seed script or promoted by an existing admin.
+    const user = await User.create({ name, email, password, role: 'sales' });
 
     const token = signToken({ id: user._id.toString(), email: user.email, role: user.role });
 
@@ -93,6 +95,46 @@ export const getUsers = async (
   try {
     const users = await User.find().select('-password').sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: { users } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateRole = async (
+  req: AuthRequest,
+  res: Response<ApiResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { role } = req.body as { role: string };
+
+    if (!['admin', 'sales'].includes(role)) {
+      res.status(400).json({ success: false, message: 'Role must be admin or sales.' });
+      return;
+    }
+
+    // Prevent an admin from demoting themselves
+    if (req.params.id === req.user!.id) {
+      res.status(400).json({ success: false, message: 'You cannot change your own role.' });
+      return;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { role },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found.' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `User role updated to ${role}.`,
+      data: { user },
+    });
   } catch (err) {
     next(err);
   }

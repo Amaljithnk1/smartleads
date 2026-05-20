@@ -7,8 +7,10 @@ import connectDB from './config/db';
 import authRoutes from './routes/auth';
 import leadRoutes from './routes/leads';
 import { notFound, errorHandler } from './middleware/errorHandler';
+import { seedAdmin } from './seed';
 
 const app = express();
+app.disable('x-powered-by'); // don't disclose Express version
 const PORT = process.env.PORT ?? 5000;
 
 // Rate limiting
@@ -52,6 +54,7 @@ app.use(errorHandler);
 // Start server
 const start = async (): Promise<void> => {
   await connectDB();
+  await seedAdmin();
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📊 Environment: ${process.env.NODE_ENV ?? 'development'}`);
